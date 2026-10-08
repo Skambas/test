@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дякую за чайові ☕</title>
+<meta name="theme-color" content="#a8957b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #a8957b;
+    --bg-deep: #96836a;
+    --paper: #f1e8d6;
+    --ink: #4a3828;
+    --ink-soft: #7a6450;
+    --btn: #5b4330;
+    --btn-text: #f1e8d6;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background:
+      radial-gradient(ellipse at 50% 40%, var(--bg) 0%, var(--bg-deep) 100%);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  }
+  main {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+  }
+
+  /* Паперовий листочок: тінь на обгортці, форма — clip-path на самому папері */
+  .note-wrap {
+    width: 100%;
+    filter: drop-shadow(0 10px 14px rgba(40, 28, 16, .35)) drop-shadow(0 2px 3px rgba(40, 28, 16, .25));
+    transform: rotate(-1.6deg);
+  }
+  .note {
+    background:
+      repeating-linear-gradient(0deg, rgba(120,95,65,.045) 0 1px, transparent 1px 3px),
+      var(--paper);
+    padding: 56px 34px 52px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+  }
+  .note.drop { animation: drop .7s cubic-bezier(.2,.8,.3,1) both; }
+  @keyframes drop {
+    from { transform: translateY(-28px) rotate(3deg); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+  .phrase {
+    font-family: 'Caveat', 'Segoe Script', cursive;
+    font-weight: 500;
+    font-size: clamp(30px, 8vw, 40px);
+    line-height: 1.2;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .phrase.long { font-size: clamp(24px, 6vw, 29px); }
+  .phrase.mid { font-size: clamp(27px, 7vw, 34px); }
+  .sign {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0;
+    text-align: right;
+  }
+
+  button {
+    appearance: none;
+    border: 0;
+    background: var(--btn);
+    color: var(--btn-text);
+    font: inherit;
+    font-size: 16px;
+    padding: 13px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(40,28,16,.3);
+    transition: transform .15s ease, background .15s ease;
+  }
+  button:hover { background: #6c523d; }
+  button:active { transform: scale(.96); }
+  button:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .note.drop { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="note-wrap">
+    <div class="note" id="note" aria-live="polite">
+      <p class="phrase" id="phrase"></p>
+      <p class="sign" id="sign"></p>
+    </div>
+  </div>
+  <button id="again" type="button">Ще одна</button>
+</main>
+
+<script>
+  const SIGNATURE = "- Ваша бариста🦊 ☕";
+
+  const PHRASES = [
+    "Дякую! Тримай віртуальне печиво. Воно без калорій 🍪",
+    "Дуже дякую! Завжди приємно бачити Вас за стійкою.",
+    "Закон фізики: енергія подяки не зникає, вона переходить у чайові баристі. Дякую за закон збереження позитиву! 🔬",
+    "Дякую! Ви купили мені мотивацію працювати до завтра!",
+    "🏆 Досягнення розблоковане: \"Щедрий гість\". Дякую!",
+    "📈 Інвестуй у каву - вона завжди окупається гарним настроєм. Дякую за інвестицію!",
+    "Дякую, що помітили, що за кавою стоїть людина 🤍",
+    "Бариста сяє від щастя! Дякую!",
+    "Такі гості, як Ви, - надихають! 🤍 🕯️",
+    "Ви доклалися до вдалих вихідних баристи. Дякую!",
+    "Дякую, ці гроші підуть на каву для мене, щоб варити ще кращу каву для Вас. Це замкнене коло!",
+    "Усміхніться! Ви тільки що зробили день однієї баристи! 🦊 🍁",
+    "Працюю на чистому ентузіазмі, але завдяки Вам тут з'явився ще й капітал",
+    "🦸 Супергерої не завжди носять плащі. Деякі носять в руці стакан \"Хюґе\". Дякую!",
+    "Дякую! До речі, праслов'янське dьkā означало \"думка\" або \"пам'ять\" - тож я Вас тепер запам'ятала.",
+    "🇫🇷 Merci! Слово походить від латинського кореня, що означає \"милосердя\" та \"благодать\". Дякую, це так милосердно!",
+    "🌸 Дякую! В японській мові подяка звучить як визнання чогось рідкісного і вартісного. Ваша підтримка сьогодні - саме така!",
+    "🇮🇹 Grazie mille! Італійське слово grazie походить від латинського gratia, означає не лише подяку, а й «милість» та «витонченість/краса» (звідси ж і слово «грація»). Дякую, що додали сьогоднішньому дню трохи краси!"
+  ];
+
+  const noteEl = document.getElementById('note');
+  const phraseEl = document.getElementById('phrase');
+  const signEl = document.getElementById('sign');
+  const btn = document.getElementById('again');
+  let last = -1;
+
+  // Рваний край: випадкові зубці зверху і знизу, щоб кожен листочок був унікальний
+  function tornEdge() {
+    const jag = (max) => (Math.random() * max).toFixed(2);
+    const top = [], bottom = [];
+    const steps = 22;
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps * 100).toFixed(2);
+      top.push(`${x}% ${jag(3.2)}%`);
+      bottom.push(`${(100 - i / steps * 100).toFixed(2)}% ${(100 - jag(3.2)).toString()}%`);
+    }
+    return `polygon(${top.join(',')},${bottom.join(',')})`;
+  }
+
+  function show() {
+    let i;
+    do { i = Math.floor(Math.random() * PHRASES.length); }
+    while (PHRASES.length > 1 && i === last);
+    last = i;
+
+    phraseEl.textContent = PHRASES[i];
+    const n = PHRASES[i].length;
+    phraseEl.className = 'phrase' + (n > 130 ? ' long' : n > 80 ? ' mid' : '');
+    signEl.textContent = SIGNATURE;
+    noteEl.style.clipPath = tornEdge();
+
+    noteEl.classList.remove('drop');
+    void noteEl.offsetWidth;          // перезапуск анімації
+    noteEl.classList.add('drop');
+  }
+
+  btn.addEventListener('click', show);
+  show();
+</script>
+</body>
+</html>
